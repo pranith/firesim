@@ -19,6 +19,7 @@ firesim_top_t::firesim_top_t(int argc, char** argv, fesvr_proxy_t* fesvr): fesvr
 
     std::vector<std::string> args(argv + 1, argv + argc);
     max_cycles = -1;
+    profile_interval = max_cycles;
     for (auto &arg: args) {
         if (arg.find("+max-cycles=") == 0) {
             max_cycles = atoi(arg.c_str()+12);
@@ -26,8 +27,6 @@ firesim_top_t::firesim_top_t(int argc, char** argv, fesvr_proxy_t* fesvr): fesvr
 
         if (arg.find("+profile-interval=") == 0) {
             profile_interval = atoi(arg.c_str()+18);
-        } else {
-            profile_interval = max_cycles;
         }
 
         if (arg.find("+blkdev=") == 0) {
@@ -216,6 +215,12 @@ void firesim_top_t::run(size_t step_size) {
     target_reset(0, 50);
 
     uint64_t start_time = timestamp();
+
+    if (step_size > profile_interval) {
+        fprintf(stderr, "step_size (%ld) cannot be larger than profile_interval (%ld)\n",
+                step_size, profile_interval);
+        abort();
+    }
 
     do {
         // Every profile_interval iterations, collect state from all fpga models

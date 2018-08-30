@@ -167,36 +167,12 @@ void firesim_top_t::loop(size_t step_size, uint64_t coarse_step_size) {
     size_t loop_end = cycles() + coarse_step_size;
 
     do {
-        if (fesvr->busy()) {
-            step(1, false);
-            delta_sum += 1;
-            if (--delta == 0) delta = (cycles() + GET_DELTA < loop_end) ? GET_DELTA : loop_end - cycles() ;
-        } else {
-            step(delta, false);
-            delta_sum += delta;
-            delta = (cycles() + GET_DELTA < loop_end) ? GET_DELTA : loop_end - cycles() ;
+        step(delta, false);
+
+        while(!done()){
+            for (auto e: endpoints) e->tick();
         }
-
-        bool _done;
-        do {
-            _done = done();
-            for (auto e: endpoints) {
-                _done &= e->done();
-                e->tick();
-            }
-        } while(!_done);
-
-        if (delta_sum == step_size || fesvr->busy()) {
-            for (auto e: endpoints) {
-                if (serial_t* s = dynamic_cast<serial_t*>(e)) {
-                    s->work();
-                }
-            }
-            // Generally this will do nothing except during program_load;
-            tether_bypass_via_loadmem();
-
-            if (delta_sum == step_size) delta_sum = 0;
-        }
+        tether_bypass_via_loadmem();
     } while (!fesvr->done() && cycles() < loop_end && cycles() <= max_cycles);
 }
 

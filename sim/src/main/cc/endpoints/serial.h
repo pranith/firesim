@@ -24,16 +24,21 @@ class serial_t: public endpoint_t
 {
     public:
         serial_t(simif_t* sim, firesim_fesvr_t* fesvr);
-        void send();
-        void recv();
-        void work();
-        virtual void tick() { }
+        void init();
+        void tick();
         virtual bool done() { return read(SERIALWIDGET_0(done)); }
-        virtual bool stall() { return false; }
+        bool stall() { return false; }
 
     private:
-        serial_data_t<uint32_t> data;
+        // Number of target cycles between fesvr interactions
+        int fesvr_step_size = 128;
         firesim_fesvr_t* fesvr;
+
+        // Tell the widget to start enqueuing tokens
+        void go();
+        // Moves data to and from the widget and fesvr
+        void send(); // FESVR -> Widget
+        void recv(); // Widget -> FESVR
 };
 
 #endif // __SERIAL_H

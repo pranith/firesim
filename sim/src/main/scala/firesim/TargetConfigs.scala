@@ -111,3 +111,26 @@ class FireSimBoomConfig extends Config(
   new BoomWithLargeTLBs ++
   // Using a small config because it has 64-bit system bus, and compiles quickly
   new boom.system.SmallBoomConfig)
+
+class FireSimMegaBoomConfig extends Config(
+  new WithBootROM ++
+  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+  new WithExtMemSize(0x400000000L) ++ // 16GB
+  new WithoutTLMonitors ++
+  new WithUARTKey ++
+  new WithNICKey ++
+  new WithBlockDevice ++
+  new BoomWithLargeTLBs ++
+  new boom.system.MegaBoomConfig)
+
+//class FireSimMegaIntBoomConfig extends Config(
+//  new WithBootROM ++
+//  new WithPeripheryBusFrequency(BigInt(3200000000L)) ++
+//  new WithExtMemSize(0x400000000L) ++ // 16GB
+//  new WithoutTLMonitors ++
+//  new WithUARTKey ++
+//  new WithNICKey ++
+//  new WithBlockDevice ++
+//  new BoomWithLargeTLBs ++
+//  // Using a small config because it has 64-bit system bus, and compiles quickly
+//  new boom.system.MegaIntBoomConfig)
